@@ -1,0 +1,27 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@discordjs/builders": "^0.5.0",
+    "@discordjs/rest": "0.1.0-canary.0",
+    "discord": "^0.8.2",
+    "discord-api-types": "^0.22.0",
+    "discord-button-embed": "^2.0.3",
+    "discord-buttons": "^4.0.0",
+    "discord-menu-embed": "^1.0.2",
+    "discord.js": "^12.5.3",
+    "discord.js-commando": "^0.12.3",
+    "discord.js-oranged": "^1.1.0",
+    "fetch": "^1.1.0",
+    "npm": "^7.21.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
