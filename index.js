@@ -1,7 +1,8 @@
 
+const mySecret = process.env['token']
+
 const mySecret1 = process.env['DB_URI']
 
-const mySecret = process.env['token']
 const Discord = require('discord.js') 
 const discord = require('discord.js');
 const client = new Discord.Client()
@@ -665,7 +666,7 @@ let clrole =  "875362597329842226"
 if(menu.values[0] == 'selfroletl' && menu.values[1] == 'selfrolets'){console.log("worked1")
 let tlrole = "875362978185244692"
 let tsrole = "875362481579630642"
-
+ 
 
           	await Member.roles.add(tsrole)
             await Member.roles.add(tlrole)
@@ -688,19 +689,21 @@ if(menu.values[0] == 'selfroletl') {
         if(!Member.roles.cache.has(tlrole)) {
             await Member.roles.add(tlrole)
             return menu.reply.send("اضيف رول المترجم لك بنجاح", true)
-        } 
+        } else{
+					return menu.reply.send("لديك هذا الرول بالفعل", true)
+				} 
 	} else{
 if(menu.values[0] == 'selfrolets') {
 		
-		console.log("worked")
-let tlrole = "875362978185244692"
-let tsrole =  "875362481579630642"
+		
 
-
-          	await Member.roles.add(tsrole)
-          
-            return menu.reply.send({
-			content:"أضيف لك رول المحرر بنجاح", ephemeral: true})
+if(!Member.roles.cache.has(tsrole)) { 
+            await Member.roles.add(tsrole)
+            return menu.reply.send("اضيف رول المحرر لك بنجاح", true)
+        } else{
+	console.log("failed to add role'its already there'")
+					return menu.reply.send("لديك هذا الرول بالفعل", true)
+				} 
 							}						
 							}}}}}}}}}}}}}}}) 
 
@@ -808,5 +811,121 @@ setInterval(() => {
 
 	var colors = ['#8585ff','#fff681','#a073fd','#fd73b9']; 
 */
-	
+client.on("message", async (message ) => {
+	if(message.content.includes("-kick")){
+    const { member, mentions } = message
+
+    const tag = `<@${member.id}>`
+
+    if (
+      member.hasPermission('ADMINISTRATOR') ||
+      member.hasPermission('KICK_MEMBERS')
+    ) {
+      const target = mentions.users.first()
+      if (target) {
+        const targetMember = message.guild.members.cache.get(target.id)
+        targetMember.kick()
+        message.reply("تم طرد المستخدم بنجاح", true )
+      } else {
+        message.reply("و هتطرد مين يروح امك؟ ", true )
+      }
+    } else {
+      message.reply("ليست لديك الصلاحيات لإستخدام هذا الأمر", true 
+  )
+    }
+ 		
+}
+})
+client.on("message", async (message)=> {
+	if(message.content.includes("-ban")){
+    const { member, mentions } = message
+
+    const tag = `<@${member.id}>`
+
+    if (
+      member.hasPermission('ADMINISTRATOR') ||
+      member.hasPermission('BAN_MEMBERS')
+    ) {
+      const target = mentions.users.first()
+      if (target) {
+        const targetMember = message.guild.members.cache.get(target.id)
+        targetMember.ban()
+        message.reply("تم حظر المستخدم بنجاح", true )
+      } else {
+        meassage.reply({
+	content:"و هتطرد مين يروح امك؟", 
+  ephemeral: true })
+      }
+    } else {
+      message.reply("ليست لديك الصلاحيات لإستخدام هذا الأمر", true 
+  )
+    }
+ 		
+}
+})
+client.on("message", async msg => { if(msg.content.includes("-mute")) {
+    const { member, mentions } = msg
+
+    const tag = `<@${member.id}>`
+
+    if (
+      member.hasPermission('ADMINISTRATOR') ) {
+      const target = mentions.users.first()
+      if (target) {
+        const targetMember = msg.guild.members.cache.get(target.id)      
+					targetMember.roles.add("875389195319926854")
+        msg.reply("تم إسكات المستخدم بنجاح", true ) 
+      } else {
+				return msg.reply({
+	content:"و هتسكت مين يروح امك؟ ", 
+  ephemeral: true })
+      }
+    } else {
+      msg.reply("ليست لديك الصلاحيات لإستخدام هذا الأمر", true 
+  )
+					}
+  }
+})
+client.on("message", async (meassage) => { 
+let msg = meassage
+let meassagee = meassage  
+if(meassage.content.includes("-unmute")) {
+	const { member, mentions } = meassage
+
+    const tag = `<@${member.id}>`
+
+        
+			
+      const target = mentions.users.first()
+      if (target) {
+        const targetMember = meassage.guild.members.cache.get(target.id)
+	if(targetMember.roles.cache.has("875389195319926854")){
+const { member, mentions } = msg
+
+    const tag = `<@${member.id}>`
+
+    if (
+      member.hasPermission('ADMINISTRATOR') ) {
+      const target = mentions.users.first()
+      if (target) {
+        const targetMember = meassage.guild.members.cache.get(target.id)      
+					targetMember.roles.remove("875389195319926854")
+        meassage.reply("تم فك إسكات المستخدم بنجاح", true ) 
+      } else {
+				return meassage.reply({
+	content:"هتفكه عن مين يسطا", 
+  ephemeral: true })
+      }
+    } else {
+      meassage.reply("ليست لديك الصلاحيات لإستخدام هذا الأمر", true 
+  )
+					}
+	}
+
+} else{
+msg.reply("هذا المستخدم غير مسكت")
+}
+}
+ 
+})
 client.login(mySecret);
