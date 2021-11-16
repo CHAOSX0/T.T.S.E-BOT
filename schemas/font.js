@@ -1,12 +1,14 @@
 const mongoose = require("mongoose")
-const font ={ 
+const fontSchema =  mongoose.Schema({
 	type:{
 		type: "Array", 
-		required:true
+		required:true, 
+		unique: false 
 	}, 
 	num: {
 		type: "Number", 
-		required: true 
+		required: true, 
+		unique: false  
 	}, 
 	title: {
 		type: "String",
@@ -26,22 +28,23 @@ const font ={
 	author: {
 	 avatar:{
 		 url: {
-			 type: "String"
+			 type: "String", 
+			 unique: false 
 		 }
 	 }, 
 	 id: {
-		 type: "String"
+		 type: "String", 
+		 unique: false 
 	 },
 	 name: {
-		 type: "String"
+		 type: "String", 
+		 unique: false 
 	 }
 	}, 
 	reported: {
 		type: "Boolean",
-		required: true, 
-		default: false
-	} }
-const fontSchema =  mongoose.Schema({
-	font
+		unique: false, 
+	  required: true, 
+		default: false }
 })
 module.exports = mongoose.model("font", fontSchema)

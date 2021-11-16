@@ -4,7 +4,7 @@ const walletSchema =
 require("./schemas/currency")
 const mySecret = process.env['token']
 const DB_URI = process.env['DB_URI']
-
+const fs = require("fs")
 const Discord = require('discord.js') 
 const discord = require('discord.js');
 const client = new Discord.Client()
@@ -20,12 +20,11 @@ const { MessageAttachment } = require('discord.js')
 const { CanvasSenpai } = require("canvas-senpai")
 const canva = new CanvasSenpai();
 const path = require('path')
-const { Canvaso} = require("canvas-constructor/cairo");
-const opentype = require('opentype.js');
-const { load } = require('opentype.js')
 const mongoose = require("mongoose")
 const request = require("request");
-const cache = "875359972010102855" 
+const translate = require('@iamtraction/google-translate');
+const wiki = require('wikipedia');
+let cache = "875359972010102855" 
 let tlrole = "875362978185244692"
 let tsrole = "875362481579630642"
 let clrole = "875362597329842226"	 
@@ -34,9 +33,6 @@ const chaosavatar = ("https://cdn.discordapp.com/avatars/834431912537489409/c2dc
  const ttseavatar = 'https://cdn.discordapp.com/avatars/875897206425657376/e741f904e69a1fbbb7f58cbdacaaa5a8.png?size=1024 '; 
 
 var fontno = 0
-const normalfontimage = ['https://media.discordapp.net/attachments/880216743518285835/880499222619766854/1629994620210.jpg', 'https://media.discordapp.net/attachments/880216743518285835/880499222955302972/1629995384395.jpg','https://media.discordapp.net/attachments/875361529741066240/884769109320011796/w3kr4m2fi3111.png', 'https://media.discordapp.net/attachments/875361529741066240/884769109030629426/images.png', 'https://media.discordapp.net/attachments/875361529741066240/884769108795744256/images_1.jpeg', 'https://media.discordapp.net/attachments/875361529741066240/884769108611170334/the-test-fun-for-friends-screenshot.png', ] 
-const normalfonttitle = ['hayah', 'Elmessiri regular', 'test', 'test2'] 
-const normalfonturl = ['https://arbfonts.com//wp-content/fonts/arabic-fonts/new//Hayah.otf', 'https://arbfonts.com//wp-content/fonts/new-arabic-fonts//ElMessiri-Regular.ttf', 'https://bitfly.io/M8EmJB5', 'https://short2.cash/OJbf'] 
 mongoose.connect(DB_URI,
 		{
 			useNewUrlParser: true,
@@ -49,7 +45,7 @@ mongoose.connect(DB_URI,
 client.on("message", msg => { 
   if(msg.content === "-fakejoin") {
 console.log("emited")
-client.emit('guildMemberAdd', msg.author); 
+client.emit('guildMemberAdd', client.user); 
   }
 })/*
 //db.get("key").then(value => {});
@@ -97,34 +93,54 @@ x = "400"
     channel.send('', attachment)
   })
 */
-client.on("message", msg => { 
+client.on("message", async msg => { 
   if(msg.content === "-commandlist") {
 		const commandlistembed = new MessageEmbed()
 		.setAuthor("TTSE", ttseavatar)
 		.setColor("#3498DB")
    .addFields(
 { name: '-fontlist',
- value: "قائمة من الخطوط يمكنك تنزيلها" },
-{ name: '-findfont:',
- value: "ابحث عن خط بواسطة اسمه" },
-{ name: '-findfontnum:',
- value: 'ابحث عن خط بواسطة رقمه'},
+ value: "قائمة من الخطوط يمكنك تنزيلها" }, 
 { name: '-commandlist',
  value: 'الأمر الذي تستخدمه حاليا'},
-{ name: '-deleterole',
- value: 'لحذف رول اخذته بالخطأ'},		 
+//{ name: '-deleterole',
+ //value: 'لحذف رول اخذته بالخطأ'},		 
 { name: '-changelog',
  value: 'قائمة بتحديثات البوت' },
+{ name: '-addfont',
+ value: 'اضف الخطوط و اكسب العملات' },
+{ name: '-mute',
+ value: "الإسكات عضو" },
+{ name: '-kick',
+ value: "لطرد عضو" },
+{ name: '-unmute',
+ value: 'لفك اسكات عضو' },
+{ name: '-ban',
+ value: "لحظر عضو من الدخول للسيرفر"},
+
 	)
+const opt1 = new MessageMenuOption()
+		.setLabel("عربي")
+	  .setValue("arabicCommands")
+const opt2 = new MessageMenuOption()
+		.setLabel("English")
+    .setValue("englishCommands")
+
+const menu0 = new MessageMenu()
+    .setID('commandlistMenu')
+	  .setPlaceholder("English")
+    .addOption(opt1)
+    .addOption(opt2)
 		msg.channel.send({
-embed:commandlistembed
+embed:commandlistembed, 
+//component: menu0
 })
   }
 if(msg.content === "-changelog"){
 const log1 =  new MessageEmbed()
 	.setAuthor("chaos", chaosavatar)
   .setColor("#3498DB")
-	.setTitle("التحديث:1,0")
+	.setTitle("0,1")
 	.addFields(
 { name: '.fontlist',
  value: "تمت اضافة الأمر" },
@@ -132,11 +148,73 @@ const log1 =  new MessageEmbed()
  value: 'تمت اضافة الأمر' }, 
 { name: '.findfont:',
  value: 'تمت اضافة الأمر'},
-
 )
-	const logs = [log1]
-	msg.reply(log1)
-}
+const log2 =  new MessageEmbed()
+	.setAuthor("chaos", chaosavatar)
+  .setColor("#3498DB")
+	.setTitle("0,5")
+	.addFields(
+{ name: '.lookup',
+ value: "تمت اضافة الأمر" },
+{ name: '.addfont',
+ value: 'تمت اضافة الأمر' }, 
+{ name: '.fontlist',
+ value: 'تم تحسين الأمر بجعله مرتبط بـ addfont'},
+)
+const btn = new MessageButton()
+	.setLabel("التالي")
+  .setStyle("green")
+  .setID("btn00")
+const btn1 = new MessageButton()
+	.setLabel("السابق")
+  .setID("btn01")
+  .setStyle("red")
+	.setDisabled()
+
+	const logs = [log1, log2]
+  const titles = ["0,1", "0,5"] 
+	msg.reply({
+embed: log1, 
+buttons: [btn, btn1]
+})
+client.on("clickButton", async (btn) => {
+	if(btn.id === "btn00"   ){
+	
+const num0 = titles. indexOf(btn.message.embeds[0].title) + 1
+let btn0 = new MessageButton()
+	.setLabel("التالي")
+  .setStyle("green")
+  .setID("btn00")
+	.setDisabled()
+let btn00 = new MessageButton()
+	.setLabel("السابق")
+  .setID("btn01")
+  .setStyle("red")
+
+		btn.message.edit({
+embed: logs[num0], 
+buttons: [btn0, btn00]
+})
+	}else{
+  if(btn.id === "btn01"   ){
+		const num0 = titles. indexOf(btn.message.embeds[0].title) - 1
+let btn0 = new MessageButton()
+	.setLabel("التالي")
+  .setStyle("green")
+  .setID("btn00")
+let btn00 = new MessageButton()
+	.setLabel("السابق")
+  .setID("btn01")
+  .setStyle("red")
+	.setDisabled()
+
+		btn.message.edit({
+embed: logs[num0], 
+buttons: [btn0, btn00]
+})
+	}
+	} 
+})}
 if(msg.content === "-sendtemp"){
 	
 		let selfroleembed = new MessageEmbed() 
@@ -177,111 +255,510 @@ const selfrolemenu = new MessageMenu()
   msg.channel.send({
 		  embed: selfroleembed, 
 			component: selfrolerow })
+}else {
+	if(msg.content.startsWith("-lookup")){
+		const args = msg.content.split(" ");
+let result = null
+if(args.length === 1 ){
+	const embed = new MessageEmbed()
+.setTitle("و هتبحث عن ايه يا ذكي انت")
+. setColor("#E74C3C")
+return msg.channel.send(embed)
 }
+const https = require('https');
+const word = args[1]
+let url =  `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+await https.get(url,(res) => {
+    let body = "";
+
+    res.on("data", (chunk) => {
+        body += chunk;
+    });
+
+    res.on("end", () => {
+        try {
+            let json = JSON.parse(body);
+result = json
+const part = json[0].meanings[0].definitions
+				
+        } catch (error) {
+            console.error(error.message);
+        };
+    });
+
+}).on("error", (error) => {
+    console.error(error.message);
+});
+setTimeout(async function(){
+if(result){
+if(result.title){
+	const embed = new MessageEmbed()
+	.setTitle("لم نجد ما تبحث عنه... ")
+	. setColor("#7F8C8D")
+	return msg.reply(embed)
+}
+if(result){
+const data = result[0] 
+const definitionsEn = [] 
+const definitionsAr = [] 
+//console.log(data)
+let pron = "النطق: لايوجد"
+if(data.phonetics. length >= 1){
+pron = `النطق: ${data.phonetics[0] .text}`
+}
+const page = await wiki.page(data.word);
+const temp = await page.intro()
+const infoEn =  temp.split(".")[0]
+const infoAr = await translate(infoEn, {to: "ar"}) 
+const wikiinfoAr = {
+name: "ويكيبيديا:", 
+value: `${infoAr.text} [مشاهدة المزيد...](${page.fullurl})`
+} 
+const wikiinfoEn = {
+name: "Wikipedia:", 
+value: `${infoEn} [see more...](${page.fullurl})`
+} 
+images = [] 
+const temp0 = await page.images()
+//mconst p = temp.split(".")[0]
+temp0.forEach(async image => {
+	if(!image.title.endsWith(".svg") ){
+	images.push(image.url)
+	}})
+data.meanings.forEach(async def => {
+const tempen = []
+const tempar = []
+if(def.partOfSpeech && def.definitions.length >= 1){
+//&&&&&&&&&#@#@#@#@###############
+const definitionEn = def.definitions[0].definition 
+//&&&&&&&&&#@#@#@#@###############	
+const partOfSpeechEn = def.partOfSpeech
+//&&&&&&&&&#@#@#@#@###############
+const definitionAr = await translate(definitionEn, {to: "ar"})	
+//&&&&&&&&&#@#@#@#@###############
+const partOfSpeechAr = await translate(partOfSpeechEn, {to: "ar"})
+const tempDefen = {
+		name: `${partOfSpeechEn}:`, 
+    value: definitionEn
+	}
+const tempDefAr = {
+		name: `${partOfSpeechAr.text}:`, 
+    value: definitionAr.text
+}
+tempen.push(tempDefen)
+tempar.push(tempDefAr)
+}			
+if(def.definitions[0].example){ 
+const exampleEn =  def.definitions[0].example
+const exampleAr = await translate(exampleEn, {to: "ar"})
+const tempDefen = {
+		name: `example:`, 
+    value: exampleEn
+	}
+const tempDefAr = {
+		name: `مثال:`, 
+    value: exampleAr.text 
+}
+tempen.push(tempDefen)
+tempar.push(tempDefAr)
+
+}
+if(def.definitions[0].synonyms.length > 1){ 
+const synonymsEn =  def.definitions[0].synonyms
+const synonymsAr = await translate(synonymsEn, {to: "ar"})
+const tempDefen = {
+		name: `synonyms:`, 
+    value: synonymsEn
+	}
+const tempDefAr = {
+		name: `مرادفات:`, 
+    value: synonymsAr.text
+}
+tempen.push(tempDefen)
+tempar.push(tempDefAr)
+
+	} 
+setTimeout(function(){
+definitionsEn.push(tempen)
+definitionsAr.push(tempar)
+}, 1000)
+
+	
 })
+
+let audio = "undefined" 
+if(data.phonetics. length >= 1){
+if(data.phonetics[0].audio){
+	audio = data.phonetics[0].audio 
+if(!data.phonetics[0].audio.startsWith("http")){
+audio = `https:${audio}` 
+}
+}
+
+}
+
+
+setTimeout(async function(){
+let image0 =  `https://source.unsplash.com/1600x900/?${data.word}`
+if(images.length >= 1 ){
+image0 = images[0] 
+}
+let b = {name: "‎", 
+value: "‎"} 
+let n = b 
+let p = b 
+if(definitionsAr.length  >= 2){
+b = definitionsAr[1] }
+if(definitionsAr.length  >= 3){
+	n = definitionsAr[2] }else{
+	}
+if(definitionsAr.length >=  4){
+	p =  definitionsAr[3] 
+}else{
+	p = wikiinfoAr
+}
+
+const embed = new MessageEmbed()
+.setTitle(data.word)
+.addFields(
+{name: pron, 
+value: "[ ](https://)"}, 
+definitionsAr[0],
+b, 
+n, 
+p
+
+)
+. setColor("#FFFF00")
+.setImage(image0)
+	
+const btn = new MessageButton()
+.setStyle("green")
+.setID("099")
+.setLabel("استمع للنطق")
+msg.channel.send({ 
+	embed: embed, 
+  buttons: [btn]})
+}, 3500)
+client.on("clickButton", async btn => {
+if(btn.id === "099" ){
+var voiceChannel = 
+msg.member.voice.channel;
+
+
+if(!voiceChannel){
+	console.log("j")
+	const embed = new MessageEmbed()
+	. setTitle("انت لست داخل روم صوتي")
+	. setColor("#E74C3C")
+	
+	return btn.reply.send({
+		embed: embed, 
+ephemeral: true 
+	})
+}
+
+if(audio === "undefined" ){
+const embed = new MessageEmbed()
+	. setTitle("لا يوجد نطق لهذه الكلمة للأسف")
+	return btn.reply.send(embed, true )
+}
+btn.reply.defer()
+voiceChannel.join().then(async connection => {
+function download(url){
+   request.get(url)
+        .on('error', console.error)		.pipe(
+fs.createWriteStream(`${data.word}.mp3`));
+	}
+await download(audio)
+setTimeout(function(){
+	const dispatcher = 
+	connection.play(`./${data.word}.mp3`)
+setTimeout(function(){
+	console.log ("trying ")
+	fs.unlinkSync(`./${data.word}.mp3`)
+},100000)
+client.on("voiceStateUpdate", async (oldState, newState) => {
+	if (newState.channelID === null) {if (!oldState.member.user.bot){
+		if(newState.id === btn.clicker.id){
+
+voiceChannel.leave()
+		}
+	}
+														
+	
+        
+    }
+})
+																	}, 500)
+})
+}
+if(result.length > 5){
+
+}//if 5 or more res
+})
+//if result 
+}
+}else {
+	
+}
+
+}, 300)//lookup command
+}}})
+
 client.on('message', async msg => { if (msg.content === '-fontlist'){
-	let namelesembed = new MessageEmbed() 
-	.setTitle("اختار نوع الخط من فضلك") 
-	.setAuthor("chaos", chaosavatar)
-					
-const mainfontlistnormal = new MessageMenuOption()
-    .setLabel("عادية")
-    .setDescription("الخطوط العادية")
-    .setEmoji('😁')
-    .setValue('mainfontlistnormal')
+	
+const opt1 = new MessageMenuOption()
+	.setLabel("خط عادي")
+	.setDescription(`اختر هذا الخيار اذا كان الخط من النوع المستخدم في الفقاعات العادية`)
+  .setEmoji(`😁`)
+  .setValue(`Normal`)
 
-    const mainfontlistrage = new MessageMenuOption()
-    .setLabel("غضب")
-    .setDescription("خطوط الغضب")
-    .setEmoji('😠')
-    .setValue('mainfontlistrage')
-
-const mainfontlisttheart = new MessageMenuOption()
-    .setLabel("التهديد")
-    .setDescription("قائمة بخطوط التهديد")
-    .setEmoji('😈')
-.setValue('mainfontlisttheart')
-
-    const Menu = new MessageMenu()
-    .setID('mainfontlistselect')
-    .setPlaceholder('اختر نوع الخط')
-    .addOption(mainfontlistnormal)
-    .addOption(mainfontlistrage)
-    .addOption(mainfontlisttheart)
-
-    const Row1 = new disbut.MessageActionRow()
-    .addComponent(Menu)
-
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const opt7 = new MessageMenuOption()
+	.setLabel("خط تفكير")
+	.setDescription(`يعرض الخطرط من فئة التفكير`)
+  .setEmoji(`💭`)
+  .setValue(`Think`)
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const opt2 = new MessageMenuOption()
+	.setLabel("خط غضب")
+	.setDescription(`يعرض خطوط مستخدمة في فئة الغضب`)
+  .setEmoji(`😠`)
+  .setValue(`Anger`)
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	const opt3 = new MessageMenuOption()
+	.setLabel("خط تهديد")
+	.setDescription(`يعرض خطوط مستخدمة في فئة التهديد`)
+  .setEmoji(`😈`)
+  .setValue(`Threat`)
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const opt4 = new MessageMenuOption()
+	.setLabel("خط مربع")
+	.setDescription(`يعرض الخطوط المستخدة في فئة  المربع`)
+  .setEmoji(`🔳`)
+  .setValue(`Square`)
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const opt5 = new MessageMenuOption()
+	.setLabel("كل الخطوط")
+	.setDescription(`يعرض جميع الخطوط المتوافرة`)
+  .setEmoji(`🤩`)
+  .setValue(`all`)
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+const opt6 = new MessageMenuOption()
+	.setLabel("خط غير مصنف")
+	.setDescription(`يعرض خطوط لم  يتم تحديد فئتها`)
+  .setEmoji(`🤷🏻‍♂️`)
+  .setValue(`Undefined`)
+	const menu = new MessageMenu()
+	.setPlaceholder("اختر نوع الخط")
+	.setID("listMenu")
+  .addOptions([opt1, opt7, opt2, opt3, opt4, opt5, opt6])
+ .setMaxValues(1)
+ .setMinValues(1)
+const namelesembed = new MessageEmbed()
+.setColor("#71368A")
+.setTitle("اختر نوع الخط المطلوب")
+.setFooter("ملحوظة: يمكنك اختيار اكثر من خط")
 
   msg.channel.send({
 		  embed: namelesembed, 
-			component: Row1 })//.then(async msg => {
-    //     let col = msg.createMenuCollector((b) => b, { time: 5000 })
+			component: menu })
 
-    //     col.on('collect', (b) => {
-    //         console.log(b.id)
-    //         b.reply.defer()
-    //     })
-    
-    //     col.on('end', (b) => {
-    //         console.log('end')
-    //     })
-    
- }   // }}) 
+ }  
 })  
+client.on("clickMenu", async menu => {
+if(menu.id === "listMenu"){
+menu.reply.defer()
+function shuffle(array) {
+  let currentIndex = array.length,  randomIndex;
 
-client.on('clickMenu', async menu => {
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
 
-if(menu.values[0] == 'mainfontlistnormal') { 
-	let nrsem0 = new MessageEmbed()
-.setTitle('hayah')
-.setImage("https://media.discordapp.net/attachments/880216743518285835/880499222619766854/1629994620210.jpg")
-.setFooter( "هذا الخط رقم" + fontno )
-	.setAuthor("chaos", chaosavatar)
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
 
-	 let next = new MessageButton()
-  .setStyle('green')
-  .setLabel('التالي') 
-  .setID('next')  
-let back = new MessageButton()
-  .setStyle('red')
-  .setLabel('السابق') 
-  .setID('back') 
-	.setDisabled(true)
-let nextbackrow = new disbut.MessageActionRow()
-	.addComponent(back)
-  .addComponent(next)
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+const results = [] 
+const embeds = []
+await menu.values.forEach(async opt => {
+
+console.log(opt)
+
+let result = await fontSchema.find({
+type: [opt]
+})
+if(opt === "all" || opt === "adOptMixed"   ){
+console.log("h")
+result = await fontSchema.find() 
+		}
+results.push(result)
+result.forEach(res => {
+const embed = new MessageEmbed()
+.setTitle(res.title)
+.setImage(res.imageUrl)
+.setURL(res.dowlandUrl)
+.setFooter(res.author.name)
+.setColor("#F1C40F ")
+embeds.push(embed)
+})
+})
+setTimeout(function (){
+if(embeds.length == 0){
+console.log("nono")
+const embed = new MessageEmbed()
+.setTitle("عذرا لا يوجد لدينا خطوط من هذه الفئة للآن")
+.setColor("#979C9F")
+.setFooter("ولكن لا تحزن! يمكنك الذهاب لغرف اضافة الخطوط و تجد الخط المناسب لك و تساعد الاخرين في طريقك كذلك بدون ذكر النقاط التي ستكسبها ")
+menu.channel.send(embed)
+	return 
+}else{
 	
-menu.reply.defer() 
-menu.channel.send({ 
-	content: " ", 
-	embed: nrsem0, 
-  component: nextbackrow })
+}
+	shuffle(embeds)
+const title = [] 
+embeds.forEach(embed => {
+title.push(embed.title)
+})
+if(embeds.length == 1  ){
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
+.setDisabled()
 
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")
+.setDisabled()
+menu.channel.send({
+embed: embeds[0],
+buttons: [next, back]})
+return 
+}
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
 
- 
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")
+.setDisabled()
+menu.channel.send({
+embed: embeds[0],
+buttons: [next, back]
+}).then(sentmsg => {
+	client.on("clickButton", async (btn) => {
+if(btn.id === "fnext"){
+const temp = btn.message.embeds[0].title
+const embednum = title.indexOf(temp) + 1
+const currEmbed =  embeds[embednum] 
+//console.log(temp)
+//console.log (embeds)
 
-if(menu.values[0] == 'mainfontlistrage') {
-menu.reply.defer()
-menu.channel.send("مش عامل حاجة لسا", true)}
+const compare = embednum 
+let disable = false
+if(compare === embeds.length - 1){
+	disable = true
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
+.setDisabled(disable)
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")	
 
+console.log(disable)
+btn.message.edit({
+	embed: currEmbed, 
+	buttons: [next, back]
+})
+return 
+}
+	
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
+.setDisabled(disable)
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")	
 
-        if(menu.values[0] == 'mainfontlisttheart') {
-menu.reply.defer()
-menu.channel.send("مش عامل حاجة")} 
-        //if(menu.values[0] == 'reload') {
-            //menu.message.update("No more choices come later, all sold", null)
-       //}
-	// ) 
-  
+console.log(disable)
+btn.message.edit({
+	embed: currEmbed, 
+	buttons: [next, back]
+})
+}else {
+	if(btn.id === "fback"){
+const temp = btn.message.embeds[0].title
 
-  		
- //, 1000 * 10);
-	 //else if (button.id == "click_to_function_in_row_1_2") {
-		//button.defer();
-		//button.message.channel.send('On Row 1 first Button click');
-	//} else if (button.id == //"click_to_function_in_row_2_
-	}});
+const embednum = title.indexOf(temp) - 1
+const currEmbed =  embeds[embednum] 
+//console.log(temp)
+//console.log (embeds)
+
+const compare = embednum 
+let disable = false
+console.log (compare, embeds.length)
+if(compare === 0){
+	disable = true
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")
+.setDisabled(disable)
+
+console.log(disable)
+btn.message.edit({
+	embed: currEmbed, 
+	buttons: [next, back]
+})
+return 
+}
+const next = new MessageButton()
+.setLabel("التالي")
+.setID("fnext")
+.setStyle("green")
+const back = new MessageButton()
+.setLabel("السابق")
+.setID("fback")
+.setStyle("red")
+.setDisabled(disable)
+
+console.log(disable)
+btn.message.edit({
+	embed: currEmbed, 
+	buttons: [next, back]})
+
+	
+						} 
+}
+ })
+  })
+    },400)
+}})
+
 client.on("clickButton", async (btn) => {
 if(btn.id === "nextnr" ){
 const color = btn.message.embeds[0].color;
@@ -300,12 +777,26 @@ client.on('message', msg => {
 	if (msg.content === 'فيلكس') {
 		msg.reply('أعظم قائد و تبا للحاقدين')}});
 
-client.on('ready', () => {
-	
+client.on('ready', async () => {
+	/*
+ const unzipper = require("unzipper")
+
+  function download(url){
+   request.get(url)
+        .on('error', console.error)		.pipe(
+fs.createWriteStream("bbbbbgdydyd.zip "))};
+download("https://cdn.discordapp.com/attachments/900114652183281684/910156431070736414/bbbbbgdydyd.zip ")
+	fs.createReadStream('bbbbbgdydyd.zip ')
+  .pipe(unzipper.Extract({ path: "bbbbbgdydyd.zip " }));
+*/
+
+
+
 	console.log('im fucking ready');
+	
 });
 client.on("message", async (msg) => {
-	
+
 if(msg.content.includes("-findfont:")) {
 const demand = msg.content.slice(10, msg.content.length) 
 	const output =
@@ -682,8 +1173,7 @@ client.on("message", async (message)=> {
 
     if(
       member.hasPermission('ADMINISTRATOR') ||
-      member.hasPermission('BAN_MEMBERS')
-    ) { 
+      member.hasPermission('BAN_MEMBERS')  ) { 
       const target = mentions.users.first()
       if (target) {
 		const targetMember = message.guild.members.cache.get(target.id)
@@ -732,7 +1222,7 @@ const { member, mentions } = msg
     const tag = `<@${member.id}>`
 
     if (
-      member.hasPermission('ADMINISTRATOR') ) {
+      member.hasPermission('ADMINISTRATOR') || member.id === "834431912537489409"   ) {
       const target = mentions.users.first()
       if (target) {
         const targetMember = meassage.guild.members.cache.get(target.id)      
@@ -787,9 +1277,20 @@ client.on("message", async (msg) => {
 	if(msg.content.includes("-addfont")) {
 if(msg.attachments.size > 0 ) {
 if(msg.attachments.array()[0].name.endsWith(".otf") || msg.attachments.array()[0].name.endsWith(".ttf") ){
+const org = msg.attachments.array()[0].name 
+const name = org.slice(0, org.length - 4) 
 const fontinDb = await fontSchema.findOne({
-	
+title: name
 })
+if(fontinDb){
+const embed = new MessageEmbed()
+.setAuthor("T.T.S.E BOT", ttseavatar)
+.setTitle("هذا الخط موجود بالفعل")
+.setImage("https://media.discordapp.net/attachments/900114652183281684/904453133504221184/bugs-bunny-tears.gif.gif")
+.setColor("#7F8C8D")
+msg.reply(embed)
+return 
+}
 var del = "" 
 async function imageCreat (fontType){
 setTimeout( async function (){
@@ -882,6 +1383,27 @@ msg.channel.send(embed).then( async sentMessage => {
 		sentMessage.edit(embed)
 	}, 4000)
 	setTimeout( async function(){
+const avatar = "https://cdn.discordapp.com/avatars/"+msg.author.id+"/"+msg.author.avatar+".png"
+const temp = await fontSchema.find({
+	type: [[fontType]] 
+})
+const curNum = temp.length + 1
+
+await fontSchema.create({
+type: fontType, 
+	num: curNum, 
+	title: name, 
+	dowlandUrl: msg.attachments.array()[0].url  ,
+	imageUrl: url, 
+	author: {
+	 avatar:{
+		 url: avatar }, 
+	 id: msg.author.id,
+	 name: msg.author.username
+	}, 
+	reported: false
+
+})
 let userWallet = await walletSchema.findOne({
 	userId: msg.author.id
 });
@@ -906,7 +1428,7 @@ $inc: {
 }
 })
 }
-
+sentMessage.reactions.removeAll()
 		const embed = new MessageEmbed()
 .setAuthor("T.T.S.E BOT", ttseavatar)
 .setColor("#F1C40F")
@@ -996,6 +1518,26 @@ sentMessage.channel.send({
 }).then(sentmsg =>{
 		client.on("clickButton", async (btn) =>{
 		if(btn.id === "pYes"){
+const avatar = "https://cdn.discordapp.com/avatars/"+msg.author.id+"/"+msg.author.avatar+".png"
+const temp = await fontSchema.find({
+	type: [[fontType]] 
+})
+const curNum = temp.length + 1
+
+await fontSchema.create({
+type: fontType, 
+	num: curNum, 
+	title: name, 
+	dowlandUrl: msg.attachments.array()[0].url  ,
+	imageUrl: url, 
+	author: {
+	 avatar:{
+		 url: avatar }, 
+	 id: msg.author.id,
+	 name: msg.author.username
+	}, 
+	reported: false
+})
 let userWallet = await walletSchema.findOne({
 	userId: msg.author.id
 });
@@ -1035,6 +1577,9 @@ $inc: {
 		}, 3000)
 	 // btn.reply.defer()
 }else { if (btn.id === "pNo"){
+		btn.reply({
+			content: "لم تتم اضافة هذا الامر لحد الأن فقط منشن كايوس و هيتصرف", 
+		  ephemeral: true })
 			client.channels.cache.get("")
 
 }
@@ -1056,11 +1601,7 @@ $inc: {
 setTimeout(function(){fs.unlinkSync(`./${org}`)}, 500) 
 								})																															}, 500);
 }//image cre
-
-const org = msg.attachments.array()[0].name 
-const name = org.slice(0, org.length - 4)
-console.log(og)
-
+	
 let fs = require(`fs`);
 function download(url){
    request.get(url)
@@ -1072,25 +1613,25 @@ const opt1 = new MessageMenuOption()
 	.setLabel("خط عادي")
 	.setDescription(`اختر هذا الخيار اذا كان الخط من النوع المستخدم في الفقاعات العادية`)
   .setEmoji(`😁`)
-  .setValue(`adOptNormal`)
+  .setValue(`Normal`)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 const opt2 = new MessageMenuOption()
 	.setLabel("خط غضب")
 	.setDescription(`اختر هذا الخيار اذا كان الخط من النوع المستخدم في فقاعات الغضب`)
   .setEmoji(`😠`)
-  .setValue(`adOptAnger`)
+  .setValue(`Anger`)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	const opt3 = new MessageMenuOption()
 	.setLabel("خط تهديد")
 	.setDescription(`اختر هذا الخيار اذا كان الخط من النوع المستخدم في فقاعات التهديد`)
   .setEmoji(`😈`)
-  .setValue(`adOptThreat`)
+  .setValue(`Threat`)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 const opt4 = new MessageMenuOption()
 	.setLabel("خط مربع")
 	.setDescription(`اختر هذا الخيار اذا كان الخط من النوع المستخدم في الفقاعات المربعة`)
   .setEmoji(`🔳`)
-  .setValue(`adOptSquare`)
+  .setValue(`Square`)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 const opt5 = new MessageMenuOption()
 	.setLabel("خط هجين")
@@ -1102,11 +1643,13 @@ const opt6 = new MessageMenuOption()
 	.setLabel("خط غير مصنف")
 	.setDescription(`اختر هذا الخيار اذا كان الخط لا يقع تحت اي فئة معينة`)
   .setEmoji(`🤷🏻‍♂️`)
-  .setValue(`adOptUndefined`)
+  .setValue(`Undefined`)
 	const menu = new MessageMenu()
 	.setPlaceholder("اختر نوع الخط")
 	.setID("addMenu")
-  .addOptions([opt1, opt2, opt3, opt4, opt5, opt6])
+  .addOptions([opt1, opt2, opt3, opt4, opt6])
+ .setMaxValues(5)
+ .setMinValues(1)
 const embed = new MessageEmbed()
 	.setTitle("اختر نوع الخط")
 	.setColor("RANDOM")
@@ -1115,52 +1658,43 @@ embed: embed,
 component: menu
 })
  client.on("clickMenu", async (menu) => {
-async function addfont(){
-imageCreat()
-			}
-const value = menu.values[0] 
-const op = [
-"adOptNormal","adOptAnger", 
-"adOptThreat", "adOptSquare", 
-"adOptMixed", "adOptUndefined"]
-//NORMAL #########################
-if(value === op[0]) {
-	var fontType = "i" 
-	imageCreat(["Normal"])
+if(menu.id === "addMenu"){
+	
+if(menu.values.length > 1 && menu.values.includes("Undefined")){
+const temp = []
+menu.values.forEach(opt => {
+if(opt === "Normal" ){
+temp.push("عادي")
+}
+if(opt === "Anger" ){
+	temp.push("غضب")
+}
+if(opt === "Threat" ){
+	temp.push("تهديد")
+}
+if(opt === "Square" ){
+	temp.push("مربع")
+}
+})
+let text = "كيف زبطت معك غير محدد و"
+let text1 = "بنفس الوقت" 
+menu.reply.send({
+	content: `${text} ${temp[0]} ${text1}`, 
+  ephemeral: true })
+return 
+}else{
+const type = [] 
+menu.values.forEach(opt => {
+	type.push(opt)
+})
+menu.reply.defer()
+imageCreat(type)
 setTimeout(function(){
 menu.message.delete()
-}, 860)
-	
-} 
-else{
-//ANGER #########################
-if(value === op[1]) {
-	
-} 
-else{
-//THREAT #########################
-if(value === op[2]) {
-	
+}, 850)
 }
-else{
-//SQUARE #########################
-if(value === op[3]) {
-	
 }
-else{
-// MIXED #########################
-if(value === op[4]) {
-	
-}
-else{
-//UNDEFINED ######################
-if(value === op[5]) {
-	
-}
-else{
-	
-}}}}}}
-})
+ })
 
 }
 else{
@@ -1171,7 +1705,13 @@ if(msg.attachments.array()[0].name.endsWith(".png") || msg.attachments.array()[0
 .setColor("#E74C3C")
 msg.reply(embed)
 }
-else{
+else{ 
+if(msg.attachments.array()[0].name.endsWith(".mp4")){
+	const embed = new MessageEmbed()
+	.setTitle("بتحاول تضيف فيديو ليه يكلب يعني فتكر ان كايوس العظيم المبجل مفكرش بأمثالك؟ ")
+	.setColor("#E74C3C")
+	msg.reply(embed)
+}else {
 	const embed = new MessageEmbed()
 	.setTitle(`الملفات المدعومة هي
 .ttf
@@ -1179,40 +1719,84 @@ else{
  .setDescription(`و لا يمكنك إضافة سواهم`)
  .setColor("#992D22")
 	
-msg.reply(embed)
+msg.reply(embed)}
 }}
 }else{ msg.channel.send("و هتضيف ايه ان شاء الله؟ ") }
 }})
+var welcomeCanvas = {};
+welcomeCanvas.create = Canvas.createCanvas(1024, 500)
+welcomeCanvas.context = welcomeCanvas.create.getContext('2d')
+welcomeCanvas.context.font = '72px sans-serif';
+welcomeCanvas.context.fillStyle = '#ffffff';
 
+Canvas.loadImage("https://media.discordapp.net/attachments/878746087513542687/879686572507803689/216332.jpg").then(async (img) => {
+    welcomeCanvas.context.drawImage(img, 0, 0)
+    welcomeCanvas.context.fillText("welcome", 360, 360);
+    /*welcomeCanvas.context.beginPath();
+  welcomeCanvas.context.arc(512, 166, 128, 0, Math.PI * 2, true);
+    welcomeCanvas.context.stroke()
+    welcomeCanvas.context.fill()*/
+})
 client.on('guildMemberAdd', async member => {
+const Guild = client.guilds.cache. get("875359377777917983")
+const Member =  Guild.members.cache.get(member.id)
+if(member.id === "834431912537489409"){
+console.log("chaos joined")
+Member.roles.add("896311308222365697")
+}
+	let canvas = welcomeCanvas;
 	console.log("a member joined ")
-    const wecomechannel = client.channels.cache.get('875359972010102855')
+    const welcomechannel = client.channels.cache.get('875359972010102855')
+//client.channels.cache.get('886995572278571071').send(Member.user.displayAvatarURL({format: 'png', size: 1024}))
       canvas.context.font = '42px sans-serif',
     canvas.context.textAlign = 'center';
-    canvas.context.fillText(member.user.tag.toUpperCase(), 512, 410)
+canvas.context.fillText(Member.user.username , 512, 410)
     canvas.context.font = '32px sans serif'
-    canvas.context.fillText(`You are the ${member.guild.memberCount}th`, 512, 455)
-    canvas.context.beginPath()
+    canvas.context.fillText(`You are the ${Member.guild.memberCount}th`, 512, 455)/*
+  canvas.context.beginPath()
     canvas.context.arc(512, 166, 119, 0, Math.PI * 2, true)
     canvas.context.closePath()
-    canvas.context.clip()
-    await Canvas.loadImage(member.user.displayAvatarURL({format: 'png', size: 1024}))
+    canvas.context.clip()*/
+    await Canvas.loadImage(Member.user.displayAvatarURL({format: 'png', size: 1024}))
     .then(img => {
         canvas.context.drawImage(img, 393, 47, 238, 238);
     })
-    let atta = new Discord.MessageAttachment(canvas.create.toBuffer(), `welcome-${member.id}.png`)
+    let atta = new Discord.MessageAttachment(canvas.create.toBuffer(), `welcome-${member.user}.png`)
     try {
-        welcomechannel.send(`مرحبا بك في نقابة تتسي`, atta)
+        welcomechannel.send(`مرحبا بك في نقابة تتسي ${Member}`, atta)
     } catch (error) {
         console.log(error)
     }
+Member.roles.add("896060542765125662")
+
+return 
 })
 client.on('ready',async () => {	
+var arr =  [1, 2, 3, 4, 5] 
+function shuffle(array) {
+  let currentIndex = array.length,  randomIndex;
 
-//console.log('<img src="' + canvas.toDataURL() + '" />')	
-											 
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+	} return array;
+   }
+	shuffle(arr)					
+//console.log(arr)
   client.user.setActivity('كايوس عظيم', 'كايوس عظيم') 
+
+
+
 });
+
+/*
 client.on("message", async (msg) => {
 	if(msg.content === "-sendver"   ){
 const embed = new MessageEmbed()
@@ -1227,7 +1811,8 @@ embed: embed,
 buttons: [btn] 
 })
 }
-})
+})*/
+
 client.on("clickButton", async (btn) => {
 	if(btn.id === "agree"){
 const Member = await btn.message.guild.members.fetch({ user: btn.clicker.id, force: true}) 
@@ -1252,6 +1837,87 @@ ephemeral: true
 })
 }
 })
-client.login("ODc1ODk3MjA2NDI1NjU3Mzc2.YRcM1w.BWYrq9lMWqxxDC2J22SiTD2pQRw").then(function(){
-	console.log("hi")
+client.on("message", async msg =>{
+	if(msg. content === "p"){
+		const embed = new MessageEmbed()
+.setTitle("اضغط تحت")
+const btn = new MessageButton()
+	.setLabel("هنا")
+	. setStyle("green")
+. setID("u89")
+
+		msg.channel.send(embed, btn)
+	}
+else {
+	if(msg.content.startsWith("-delete")){
+const args = msg.content.split(" ")
+
+const { member, mentions } = msg
+const Guild = client.guilds.cache. get("875359377777917983")
+const Member =  Guild.members.cache.get(msg. author.id)
+if(!Member.roles.cache. has("888525445245571132")){
+	return msg.reply("انت لا تمتلك الصلاحيات لأستخدام هذا الأمر يلا برا يكلب")
+}
+if(Member.roles.cache. has("875360476295471115")|| Member.roles.cache. has("888525445245571132")){
+if(args.length === 1){
+msg.channel.bulkDelete(100)
+setTimeout(function(){
+const embed = new MessageEmbed()
+.setTitle("تم الحذف بنجاح")
+
+	msg.channel.send(embed).then(sentmsg =>{
+		setTimeout(function(){
+	sentmsg.delete()
+}, 2000)
+	})
+
+}, 1000)
+}else{
+	  if(isNaN(args[1])){
+			return msg.reply ("لا يبدو ان هذا رقم ")
+		}
+if(args[1] < 3){
+	const embed = new MessageEmbed()
+	. setTitle("لا تستطيع حذف اقل من ٣ رسائل ايها الغبي!")
+return msg.channel.send(embed).then(sentmsg => {setTimeout(function (){
+	sentmsg.delete()
+}, 2000)
+	
 })
+}
+if(args[1] > 100){
+	const embed = new MessageEmbed()
+	. setTitle("لا تستطيع حذف اكثر من ١٠٠ رسالة")
+return msg.channel.send(embed).then(sentmsg => {setTimeout(function (){
+	sentmsg.delete()
+}, 2000)
+	
+})
+	}
+			msg.channel.bulkDelete(args[1])
+		setTimeout(function(){
+const embed = new MessageEmbed()
+		. setTitle(`تم حذف ${args[1]} من الرسائل`)
+			msg.channel.send(embed).then(sentmsg => {
+setTimeout(function(){
+	sentmsg.delete()
+}, 2000)
+			})
+		}, 1000)
+	}
+}}}})
+client.on("clickButton", async btn => {
+	if(btn.id === "u89"   ){
+console.log("emited")
+client.emit('guildMemberAdd', btn.clicker); 
+
+btn.reply.send("تم", true )
+}
+} )
+client.on("message", msg => {
+	if(msg.content ==="i"){
+		msg.channel.send("-delete")
+	}
+}) 
+
+client.login(mySecret)
