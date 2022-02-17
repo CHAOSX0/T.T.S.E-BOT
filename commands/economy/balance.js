@@ -8,6 +8,9 @@ module.exports = {
  // minArgs: 2,
  // maxArgs: ,
   callback: async (message, arguments, text) =>{
+   if(msg.guild.id == "888405450616352809" && msg.author.id !== "834431912537489409"){
+return 
+   }
    const msg = message; 
    let member =  msg.mentions.members.first() 
    if(!member)member = msg.member;   const member_id = member.user.id

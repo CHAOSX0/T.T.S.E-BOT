@@ -4,12 +4,14 @@ const { MessageEmbed } = require('discord.js');
 const { MessageMenu,         
 MessageMenuOption } = require("discord-buttons") ;
 module.exports = {
-  commands: ['commandlist', 'قائمة الأوامر', "لائحة الأوامر", "help", "command list"],
+  commands: ['commandlist', 'قائمة الأوامر', "لائحة الأوامر", "help", "command list", "commandslist"],
   //expectedArgs: '<num1> <num2>',
   permissionError: 'You need admin permissions to run this command',
   //minArgs: 0,
   //maxArgs: 0,
-  callback: (message, arguments, text) => {    const msg = message ;
+  callback: (message, arguments, text) => {  
+const msg = message ;
+if(msg.guild.id !== "888405450616352809"){
 const commandlistembed = new MessageEmbed()
 .setAuthor("TTSE", ttseavatar)
 .setColor("#3498DB")
@@ -20,9 +22,16 @@ const commandlistembed = new MessageEmbed()
  value: 'الأمر الذي تستخدمه حاليا'},
 { name: '-lookup',
  value: "ابحث عن كلمة إنجليزية في القاموس"},
-
-//{ name: '-deleterole',
- //value: 'لحذف رول اخذته بالخطأ'},		 
+{
+name: "-mute", 
+value: `أمر ميوت المعتاد بس بخاصية  timout `
+}, 
+{
+name: "-balance", 
+value: "تحقق من رصيدك"
+}, 
+{ name: '-cut',
+ value: 'قص الصور الطويلة'},		 
 { name: '-delete',
 value: 'حذف عدد معين من الرسائل' },
 { name: '-addfont',
@@ -53,6 +62,6 @@ msg.channel.send({
 embed:commandlistembed, 
 //component: menu0
 })
-  },
+  }},
   requiredRoles: [],
-}
+        }

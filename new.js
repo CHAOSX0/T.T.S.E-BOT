@@ -1,5 +1,7 @@
+const mySecret = process.env['token2']
 const client = require("./index.js")
 const fs = require("fs")
+const Discord = require("discord.js")
 const path = require("path")
 const Client = client 
 const functions = require("./functions.js")  
@@ -25,4 +27,3 @@ client.on('ready', async () => {
 
   readCommands('commands')
 }) 
-const no = ("./timers/timer") 

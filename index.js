@@ -1,10 +1,11 @@
-const nob = require("./timers/timer_2")
+
 const fontSchema = require("./schemas/font")
 const walletSchema =
   require("./schemas/currency")
 const mySecret = process.env['token']
 const DB_URI = process.env['DB_URI']
 const fs = require("fs")
+const url = require("./functions/urls.js")
 const Discord = require('discord.js')
 const discord = require('discord.js');
 const client = new Discord.Client()
@@ -12,7 +13,6 @@ const { MessageEmbed } = require('discord.js');
 require('discord-buttons')(client);
 const { MessageMenu,
   MessageMenuOption } = require("discord-buttons");
-const timerEvent = require("./timers/timer_Hub")
 const { MessageButton, MessageActionRow } = require('discord-buttons');
 const disbut = require("discord-buttons");
 const Canvas = require('canvas')
@@ -42,7 +42,15 @@ mongoose.connect(DB_URI,
     useUnifiedTopology: true
   }
 )
-  .then(response => console.log('\n\ndb connected successfully...'))
+  .then(response => {
+console.log('\n\ndb connected successfully...')
+      
+ fontSchema.find().then(res => {
+console.log(res)
+})
+
+                    } )
+   
   .catch(err => console.log(err));
 
 client.on("message", msg => {
@@ -160,7 +168,7 @@ client.on("message", async msg => {
     const selfroletl = new MessageMenuOption()
       .setLabel("مترجم")
       .setDescription("اختر هذا الخيار اذا كنت مترجم")
-      .setEmoji('🈴')
+      .setEmoji("🈴")
       .setValue('selfroletl')
 
     const selfrolets = new MessageMenuOption()
@@ -513,9 +521,6 @@ client.on('message', async msg => {
       embed: namelesembed,
       component: menu
     })
-
-  }
-})
 client.on("clickMenu", async menu => {
   if (menu.id === "listMenu") {
     menu.reply.defer()
@@ -546,7 +551,6 @@ client.on("clickMenu", async menu => {
         type: [opt]
       })
       if (opt === "all" || opt === "adOptMixed") {
-        console.log("h")
         result = await fontSchema.find()
       }
       results.push(result)
@@ -556,7 +560,7 @@ client.on("clickMenu", async menu => {
           .setImage(res.imageUrl)
           .setURL(res.dowlandUrl)
           .setFooter(res.author.name)
-          .setColor("#F1C40F ")
+          .setColor("#F1C40F")
         embeds.push(embed)
       })
     })
@@ -595,14 +599,15 @@ client.on("clickMenu", async menu => {
         })
         return
       }
+const indentfy = Math.floor(Math.random() * 999*9).toString() + Math.floor(Math.random() * 999*9).toString(); 
       const next = new MessageButton()
         .setLabel("التالي")
-        .setID("fnext")
+        .setID(`fnext${indentfy}`)
         .setStyle("green")
 
       const back = new MessageButton()
         .setLabel("السابق")
-        .setID("fback")
+        .setID(`fback${indentfy}`)
         .setStyle("red")
         .setDisabled()
       menu.channel.send({
@@ -610,7 +615,7 @@ client.on("clickMenu", async menu => {
         buttons: [next, back]
       }).then(sentmsg => {
         client.on("clickButton", async (btn) => {
-          if (btn.id === "fnext") {
+          if (btn.id === `fnext${indentfy}`) {
             const temp = btn.message.embeds[0].title
             const embednum = title.indexOf(temp) + 1
             const currEmbed = embeds[embednum]
@@ -623,12 +628,12 @@ client.on("clickMenu", async menu => {
               disable = true
               const next = new MessageButton()
                 .setLabel("التالي")
-                .setID("fnext")
+                .setID(`fnext${indentfy}`)
                 .setStyle("green")
                 .setDisabled(disable)
               const back = new MessageButton()
                 .setLabel("السابق")
-                .setID("fback")
+                .setID(`fback${indentfy}`)
                 .setStyle("red")
 
               console.log(disable)
@@ -641,12 +646,12 @@ client.on("clickMenu", async menu => {
 
             const next = new MessageButton()
               .setLabel("التالي")
-              .setID("fnext")
+              .setID(`fnext${indentfy}`)
               .setStyle("green")
               .setDisabled(disable)
             const back = new MessageButton()
               .setLabel("السابق")
-              .setID("fback")
+              .setID(`fback${indentfy}`)
               .setStyle("red")
 
             console.log(disable)
@@ -655,7 +660,7 @@ client.on("clickMenu", async menu => {
               buttons: [next, back]
             })
           } else {
-            if (btn.id === "fback") {
+            if (btn.id === `fback${indentfy}`) {
               const temp = btn.message.embeds[0].title
 
               const embednum = title.indexOf(temp) - 1
@@ -670,11 +675,11 @@ client.on("clickMenu", async menu => {
                 disable = true
                 const next = new MessageButton()
                   .setLabel("التالي")
-                  .setID("fnext")
+                  .setID(`fnext${indentfy}`)
                   .setStyle("green")
                 const back = new MessageButton()
                   .setLabel("السابق")
-                  .setID("fback")
+                  .setID(`fback${indentfy}`)
                   .setStyle("red")
                   .setDisabled(disable)
 
@@ -687,11 +692,11 @@ client.on("clickMenu", async menu => {
               }
               const next = new MessageButton()
                 .setLabel("التالي")
-                .setID("fnext")
+                .setID(`fnext${indentfy}`)
                 .setStyle("green")
               const back = new MessageButton()
                 .setLabel("السابق")
-                .setID("fback")
+                .setID(`fback${indentfy}`)
                 .setStyle("red")
                 .setDisabled(disable)
 
@@ -709,17 +714,9 @@ client.on("clickMenu", async menu => {
     }, 400)
   }
 })
-
-
-client.on("clickButton", async (btn) => {
-  if (btn.id === "nextnr") {
-    const color = btn.message.embeds[0].color;
-    var property_id = ""
-    if (color === 3447003) property_id = "normal"
-    console.log(color)
-    console.log(property_id)
   }
 })
+
 client.on('message', msg => {
   if (msg.content === 'السلام عليكم') {
     msg.reply('و عليكم السلام')
@@ -733,6 +730,7 @@ client.on('message', msg => {
 });
 
 client.on('ready', async () => {
+
 	/*
  const unzipper = require("unzipper")
 
@@ -1311,96 +1309,95 @@ client.on("message", async (msg) => {
             ctx.fillText(name, y, x)
             ctx.fillText("خطوط التحرير", 500, 460)
 
-            let atta = new Discord.MessageAttachment(canvas.toBuffer(), `${name} image.png`)
-            client.channels.cache.get("886995572278571071").send(atta).then(async sentmessage => {
-              const url =
-                sentmessage.attachments.array()[0].url
-              const embed = new MessageEmbed()
-                .setAuthor("T.T.S.E BOT", ttseavatar)
+ let atta = new Discord.MessageAttachment(canvas.toBuffer(), `${name} image.png`)
+let atta1 = new Discord.MessageAttachment(msg.attachments.array()[0].url, `${name}file.${msg.attachments.array()[0].name.split(".").pop()}`)
+            client.channels.cache.get("886995572278571071").send({files: [atta, atta1]}).then(async sentmessage => {
+const url = sentmessage.attachments.array()[0].url 
+const embed = new MessageEmbed()
+                .setAuthor("T.T.S.E BOT",ttseavatar)
                 .setColor("#F1C40F")
                 .setTitle("النتيجة المتوقعة:")
                 .setDescription(name)
                 .setImage(url)
-                .setURL(msg.attachments.array()[0].url)
-                .setFooter(`ستتم اضافة الخط في خمس ثواني
+                .setURL(url) 
+                .setFooter(`ستتم اضافة الخط في 5 ثواني
 اذا وجدت اي اخطاء اضغط🔴`)
               msg.channel.send(embed).then(async sentMessage => {
                 sentMessage.react("🔴")
-                setTimeout(function() {
-                  const embed = new MessageEmbed()
-                    .setAuthor("T.T.S.E BOT", ttseavatar)
-                    .setColor("#F1C40F")
-                    .setTitle("النتيجة المتوقعة:")
-                    .setDescription(name)
-                    .setImage(url)
-                    .setURL(msg.attachments.array()[0].url)
-                    .setFooter(`ستتم اضافة الخط في اربع ثواني
-اذا وجدت اي اخطاء اضغط🔴`)
-                  sentMessage.edit(embed)
-                }, 1000)
-                setTimeout(function() {
-                  if (sentMessage.deleted) return; const embed = new MessageEmbed()
-                    .setAuthor("T.T.S.E BOT", ttseavatar)
-                    .setColor("#F1C40F")
-                    .setTitle("النتيجة المتوقعة:")
-                    .setDescription(name)
-                    .setImage(url)
-                    .setURL(msg.attachments.array()[0].url)
-                    .setFooter(`ستتم اضافة الخط في ثلاث ثواني
-اذا وجدت اي اخطاء اضغط🔴`)
-                  sentMessage.edit(embed)
-                }, 2000)
-                setTimeout(function() {
-                  if (sentMessage.deleted) return;
-                  const embed = new MessageEmbed()
-                    .setAuthor("T.T.S.E BOT", ttseavatar)
-                    .setColor("#F1C40F")
-                    .setTitle("النتيجة المتوقعة:")
-                    .setDescription(name)
-                    .setImage(url)
-                    .setURL(msg.attachments.array()[0].url)
-                    .setFooter(`ستتم اضافة الخط في  ثانيتين
-اذا وجدت اي اخطاء اضغط🔴`)
-                  sentMessage.edit(embed)
-                }, 3000)
-                setTimeout(function() {
-                  if (sentMessage.deleted) return;
-                  const embed = new MessageEmbed()
-                    .setAuthor("T.T.S.E BOT", ttseavatar)
-                    .setColor("#F1C40F")
-                    .setTitle("النتيجة المتوقعة:")
-                    .setDescription(name)
-                    .setImage(url)
-                    .setURL(msg.attachments.array()[0].url)
-                    .setFooter(`ستتم اضافة الخط في ثانية
-اذا وجدت اي اخطاء اضغط🔴`)
-                  sentMessage.edit(embed)
-                }, 4000)
-                setTimeout(async function() {
-                  if (sentMessage.deleted) return;
-                  const avatar = "https://cdn.discordapp.com/avatars/" + msg.author.id + "/" + msg.author.avatar + ".png"
-                  const temp = await fontSchema.find({
-                    type: [[fontType]]
-                  })
-                  const curNum = temp.length + 1
+var time = 0
+var looping = true 
+var intreval = setInterval(async function(){
+if(looping){
+console.log(time)
+if(time == 6  ){
+clearInterval(intreval)
+looping = false
+}
+if(time == 5){
+function shorten (link){
+var promise = new Promise((resolve, reject) => {
+var request = require('request');
+var headers = {
+    'Authorization': 'Bearer 0b66ec1a7d74d6dc8ba30f0c0b8a4f960ef4de71',
+    'Content-Type': 'application/json'
+};
 
-                  await fontSchema.create({
-                    type: fontType,
-                    num: curNum,
-                    title: name,
-                    dowlandUrl: msg.attachments.array()[0].url,
-                    imageUrl: url,
-                    author: {
-                      avatar: {
-                        url: avatar
-                      },
-                      id: msg.author.id,
-                      name: msg.author.username
-                    },
-                    reported: false
+var dataString = `{"long_url": "${link}"}`
 
-                  })
-                  let userWallet = await walletSchema.findOne({
+var options = {
+    url: 'https://api-ssl.bitly.com/v4/shorten',
+    method: 'POST',
+    headers: headers,
+    body: dataString
+};
+
+function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+  const temp = JSON.parse(body.toString())
+console.log(temp)
+  resolve(temp)
+    }else{
+        if(error){
+        reject(error)
+        }else{
+        const temp = JSON.parse(body.toString())
+  resolve(temp) 
+        }
+    }
+        
+}
+
+request(options, callback);
+})
+return promise 
+}
+const funq = require("./functions/urls.js")
+time++
+const avatar = "https://cdn.discordapp.com/avatars/" + msg.author.id + "/" + msg.author.avatar + ".png"
+const shortUrl = await shorten(sentmessage.attachments.array()[1].url);
+console.log(shortUrl)
+console.log("aha")
+const curNum = 1
+await fontSchema.create({
+type: fontType,
+num: curNum,
+title: name,
+dowlandUrl: shortUrl.link,
+longUrl: sentmessage.attachments.array()[1].url, 
+linkId: shortUrl.id,
+imageUrl: url,
+author: {
+ avatar: {
+  url: avatar
+         },
+ id: msg.author.id,
+ name: msg.author.username
+        },
+ reported: false
+}).then(res=> {
+console.log(res)
+})
+let userWallet = await walletSchema.findOne({
                     userId: msg.author.id
                   });
                   if (!userWallet) {
@@ -1425,12 +1422,12 @@ client.on("message", async (msg) => {
                       })
                   }
                   sentMessage.reactions.removeAll()
-                  const embed = new MessageEmbed()
-                    .setAuthor("T.T.S.E BOT", ttseavatar)
-                    .setColor("#F1C40F")
-                    .setTitle("تمت اضافة الخط")
-                    .setDescription("منحت 10 قطع فضية كمكافأت لمساهمتك في السيرفر")
-                  sentMessage.edit(embed)
+const embed = new MessageEmbed()
+.setAuthor("T.T.S.E BOT", ttseavatar)
+.setColor("#F1C40F")
+.setTitle("تمت اضافة الخط")
+.setDescription("منحت 10 قطع فضية كمكافأت لمساهمتك في السيرفر")
+sentMessage.edit(embed)
 
                   setTimeout(async function() {
                     sentMessage.delete()
@@ -1438,7 +1435,22 @@ client.on("message", async (msg) => {
                       msg.delete()
                     }
                   }, 4000)
-                }, 5000)
+}
+if(time <= 4) {
+time ++
+const embed = new MessageEmbed()
+.setAuthor("T.T.S.E BOT",ttseavatar)
+.setColor("#F1C40F")
+.setTitle("النتيجة المتوقعة:")
+.setDescription(name)
+.setImage(url)
+ .setURL(url) 
+.setFooter(`ستتم اضافة الخط في ${5 - time} ثواني
+اذا وجدت اي اخطاء اضغط🔴`)
+sentMessage.edit(embed)
+} 
+}}, 1000)
+                
                 client.on("messageReactionAdd", async (reaction, user) => {
                   if (reaction.partial) {
                     try {
@@ -1451,10 +1463,12 @@ client.on("message", async (msg) => {
                   }
                   if (!user.bot) {
                     if (reaction.emoji.name === "🔴" && reaction.message.id === sentMessage.id) {
-                      if (user.id === msg.author.id) {
-                        setTimeout(function() {
-                          if (sentMessage.deletable) {
-                            sentMessage.delete()
+
+ if (user.id === msg.author.id) {
+  clearInterval(intreval)
+setTimeout( function() {
+if (sentMessage.deletable) {
+         sentMessage.delete()
                           }
 
                           if (msg.deletable) {
@@ -1496,8 +1510,7 @@ client.on("message", async (msg) => {
                         let atta = new Discord.MessageAttachment(canvas.toBuffer(), `${name} image.png`)
 
                         client.channels.cache.get("886995572278571071").send(atta).then(message => {
-                          const url =
-                            message.attachments.array()[0].url
+const url = message.attachments.array()[0].url 
                           const embed = new MessageEmbed()
                             .setTitle("يؤسفنا سماع مواجهتك لخطأ")
                             .setDescription("هل حل هذا المشكلة؟")
@@ -1516,82 +1529,80 @@ client.on("message", async (msg) => {
                             buttons: [btn1, btn2],
                             embed: embed
                           }).then(sentmsg => {
-                            client.on("clickButton", async (btn) => {
-                              if (btn.id === "pYes") {
-                                const avatar = "https://cdn.discordapp.com/avatars/" + msg.author.id + "/" + msg.author.avatar + ".png"
-                                const temp = await fontSchema.find({
-                                  type: [[fontType]]
-                                })
-                                const curNum = temp.length + 1
+client.on("clickButton",async btn => {
+ if(btn.id == "pYes"  ){
+const avatar = "https://cdn.discordapp.com/avatars/" + msg.author.id + "/" + msg.author.avatar + ".png"
+  
 
-                                /*await fontSchema.create({
-                                type: fontType, 
-                                  num: curNum, 
-                                  title: name, 
-                                  dowlandUrl: msg.attachments.array()[0].url  ,
-                                  imageUrl: url, 
-                                  author: {
-                                   avatar:{
-                                     url: avatar }, 
-                                   id: msg.author.id,
-                                   name: msg.author.username
-                                  }, 
-                                  reported: false
-                                })
-                                let userWallet = await walletSchema.findOne({
-                                  userId: msg.author.id
-                                });
-                                if(!userWallet){
-                                const newWallet = {
-                                    userId: msg.author.id, 
-                                  wallet: {
-                                
-                                    silver: 10,
-                                    total: 10*100
-                                  }
-                                }
-                                await walletSchema.create(newWallet)
-                                }
-                                if(userWallet){
-                                  await walletSchema.updateOne({
-                                    userId: msg.author.id
-                                  }, {
-                                $inc: {
-                                  "wallet.silver":10, 
-                                  "wallet.total":10*100
-                                }
-                                })
-                                }*/
+                  await fontSchema.create({
+                    type: fontType,
+                    num: 1,
+                    title: name,
+                    dowlandUrl: msg.attachments.array()[0].url,
+                    imageUrl: url,
+                    author: {
+                      avatar: {
+                        url: avatar
+                      },
+                      id: msg.author.id,
+                      name: msg.author.username
+                    },
+                    reported: false
 
-                                const embed = new MessageEmbed()
-                                  .setAuthor("T.T.S.E BOT", ttseavatar)
-                                  .setColor("#F1C40F")
-                                  .setTitle("تمت اضافة الخط")
-                                  .setDescription("منحت 10 قطع فضية كمكافأت لمساهمتك في السيرفر")
-                                sentmsg.edit({
-                                  embed: embed,
-                                  buttons: null
-                                })
-                                setTimeout(function() {
-                                  sentmsg.delete()
-                                }, 3000)
-                                // btn.reply.defer()
-                              } else {
-                                if (btn.id === "pNo") {
-                                  await fontSchema.findOneAndDelete({
-                                    title: name
-                                  }).then(res => {
-                                    console.log("deleted")
-                                  })
-                                  btn.reply({
-                                    content: "لم تتم اضافة هذا الامر لحد الأن فقط منشن كايوس و هيتصرف",
-                                    ephemeral: true
-                                  })
-                                  //client.channels.cache.get("")
+                  })
+let userWallet = await walletSchema.findOne({
+                    userId: msg.author.id
+                  });
+                  if (!userWallet) {
+                    const newWallet = {
+                      userId: msg.author.id,
+                      wallet: {
 
-                                }
-                              }
-                            })
+                        silver: 10,
+                        total: 10 * 100
+                      }
+                    }
+                    await walletSchema.create(newWallet)
+                  }
+                  if (userWallet) {
+                    await walletSchema.updateOne({
+                      userId: msg.author.id
+                    }, {
+                        $inc: {
+                          "wallet.silver": 10,
+                          "wallet.total": 10 * 100
+                        }
+                      })
+                  }
+sentmsg.reactions.removeAll()
+const embed = new MessageEmbed()
+.setAuthor("T.T.S.E BOT", ttseavatar)
+.setColor("#F1C40F")
+.setTitle("تمت اضافة الخط")
+.setDescription("منحت 10 قطع فضية كمكافأت لمساهمتك في السيرفر")
+sentmsg.edit({
+embed: embed
+})
+
+                  setTimeout(async function() {
+                    sentMessage.delete()
+                    if (msg.deletable) {
+                      msg.delete()
+                    }
+                  }, 4000)
+         
+ }
+if(btn.id == "pNo"  ){
+ const embed = new MessageEmbed()
+.setTitle("احا ")
+.setColor("#ff0303")
+.setDescription("روح تكلم مع @𝖈𝖍𝖆𝖔𝖘#7264 ")
+sentmsg.edit({
+component: null,
+embed: embed
+})
+}
+})
                           })
                         })
                       } else {
@@ -1737,7 +1748,16 @@ client.on("message", async (msg) => {
     } else { msg.channel.send("و هتضيف ايه ان شاء الله؟ ") }
   }
 })
-
+client.on("clickButton", async btn => {
+try{
+ if(btn.type == "pNo"){
+    btn.meassage.edit("كويس")
+ }
+}
+catch{
+ return 
+}
+})
 client.on('guildMemberAdd', member => {
   var welcomeCanvas = {};
   welcomeCanvas.create = Canvas.createCanvas(1024, 500)
@@ -2067,22 +2087,46 @@ client.on("message", async msg => {
             member: Member.user,
             time: time
           }
-          timerEvent.emit("timer", data)
+          
 
-          setTimeout(function() {
-            Member.roles.remove("919046775854231562")
-          }, time)
-          Member.roles.add("919046775854231562")
-          const embed1 = new MessageEmbed()
-            .setTitle(`تم اسكات ${Member.user.username}`)
-            .setColor("#2ECC71")
-          return msg.reply(embed1)
-        }
         Member.roles.add("919046775854231562")
-        const embed1 = new MessageEmbed()
-          .setTitle(`تم اسكات ${Member.user.username}`)
-          .setColor("#2ECC71")
-        return msg.reply(embed1)
+setTimeout(function(){
+Member.roles.remove("919046775854231562")
+}, time)          
+let time1 = new Date().getTime();
+const tilltime = new Date(time1 + time).toISOString();
+                  axios.patch(`https://discord.com/api/v9/guilds/${msg.guild.id}/members/${id}`, {
+                    'communication_disabled_until': `${tilltime}`
+                  }, {
+                      headers: {
+                        'Authorization': 'Bot ' + client.token.toString(),
+                        'Content-Type': 'application/json'
+                      }
+                    }).then(() => {
+                      const embed = new MessageEmbed()
+                        .setTitle(`تم اسكات ${user.username} بنجاح`)
+                        .setColor("#32a852")
+                      return msg.reply(embed)
+                    })        }
+        Member.roles.add("919046775854231562")
+setTimeout(function(){
+Member.roles.remove("919046775854231562")
+}, 1000*60*60*24*7)          
+let time = new Date().getTime();
+const tilltime = new Date(time + 1000*60*60*24*7).toISOString();
+                  axios.patch(`https://discord.com/api/v9/guilds/${msg.guild.id}/members/${Member.user.id}`, {
+                    'communication_disabled_until': `${tilltime}`
+                  }, {
+                      headers: {
+                        'Authorization': 'Bot ' + client.token.toString(),
+                        'Content-Type': 'application/json'
+                      }
+                    }).then(() => {
+                      const embed = new MessageEmbed()
+                        .setTitle(`تم اسكات ${Member.user.username} بنجاح`)
+                        .setColor("#32a852")
+                      msg.reply(embed)
+                    })
       }
 
     }
@@ -2122,9 +2166,12 @@ client.on("message", async msg => {
                     .setColor("#992D22")
                   msg.reply(embed)
                 } else {
-                  let time = new Date().getTime();
-                  const tilltime = new Date(time +
-                    1000 * 60 * 60).toISOString();
+Member.roles.add("919046775854231562")
+setTimeout(function(){
+Member.roles.remove("919046775854231562")
+}, 1000*60*60*24*7)          
+let time = new Date().getTime();
+const tilltime = new Date(time + 1000*60*60*24*7).toISOString();
                   axios.patch(`https://discord.com/api/v9/guilds/${msg.guild.id}/members/${id}`, {
                     'communication_disabled_until': `${tilltime}`
                   }, {
@@ -2203,8 +2250,11 @@ client.on("message", async msg => {
                       value: "ㅤ"
                     }
                     let time = new Date().getTime();
-                    const tilltime = new Date(time + 30000).toISOString();
-                    axios.patch(`https://discord.com/api/v9/guilds/${msg.guild.id}/members/${id}`, {
+                    const tilltime = new Date(time + 1000*60*60*24*7).toISOString();
+target.roles.add("919046775854231562")
+setTimeout(function(){
+rarget.roles.remove("919046775854231562")
+}, 1000*60*60*24*7 );          axios.patch(`https://discord.com/api/v9/guilds/${msg.guild.id}/members/${id}`, {
                       'communication_disabled_until': `${tilltime}`
                     }, {
                         headers: {
@@ -2248,4 +2298,4 @@ client.on("message", async msg => {
 
 client.login(mySecret).catch(err=> {
 console.log(err)
-})
+}) 
